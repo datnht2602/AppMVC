@@ -5,6 +5,8 @@ using AppMVC.Services;
 using Microsoft.AspNetCore.Mvc.Razor;
 using AppMVC.ExtendMethods;
 using Microsoft.AspNetCore.Routing.Constraints;
+using AppMVC.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,8 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
 });
 builder.Services.AddSingleton<ProductService>();
 builder.Services.AddSingleton(typeof(PlanetService));
+builder.Services.AddDbContext<ApplicationDBContext>(
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationDBContext")));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
