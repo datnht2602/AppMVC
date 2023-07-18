@@ -56,6 +56,7 @@ namespace AppMVC.Controllers
             }
             return View("xinchao2", username);
         }
+        [AcceptVerbs("POST","GET")]
         public IActionResult ViewProduct(int? id){
             var product = _productService.FirstOrDefault( p=> p.Id == id);
             if(product == null){

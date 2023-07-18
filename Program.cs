@@ -1,6 +1,10 @@
+using System.Text.RegularExpressions;
+using System.Net;
 using System;
 using AppMVC.Services;
 using Microsoft.AspNetCore.Mvc.Razor;
+using AppMVC.ExtendMethods;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +15,7 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
 { options.ViewLocationFormats.Add("MyViews/{1}/{0}" + RazorViewEngine.ViewExtension);
 });
 builder.Services.AddSingleton<ProductService>();
+builder.Services.AddSingleton(typeof(PlanetService));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,14 +28,38 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.AddStatusCodePage();
 app.UseRouting();
 app.UseAuthentication();
 
 app.UseAuthorization();
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapGet("/sayhi", async(context) =>{
+        await context.Response.WriteAsync($"Hello Asp.Net MVC {DateTime.Now}");
+    });
+});
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "first",
+    pattern: "{url:regex(^((xemsanpham)|(viewproduct))$)}/{id:range(1,3)}",
+    defaults: new{
+        controller = "First",
+        action = "ViewProduct"
+    }
+    // constraints: new {
+    //     // url = new StringRouteConstraint("xemsanpham"),
+    //     // url = new RegexRouteConstraint(@"^((xemsanpham)|(viewproduct))$"),
+    //     // id = new RangeRouteConstraint(1,3)
+    // }
+);
+app.MapControllerRoute(
+    name: "defaults",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+app.MapAreaControllerRoute(
+    name: "product",
+    pattern :"{controller}/{action=Index}/{id?}",
+    areaName: "ProductManage"
+);
 app.MapRazorPages();
 app.Run();
